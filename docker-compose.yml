@@ -1,0 +1,36 @@
+version: '3.8'
+
+services: 
+  mysqldb:
+    image: mysql:5.7
+    container_name: mysql_container
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: $MYSQL_ROOT_PASSWORD
+      MYSQL_DATABASE: $NAME_DB
+    ports:
+      - $MYSQL_LOCAL_PORT:$MYSQL_DOCKER_PORT
+    volumes: 
+      - db-config:/etc/mysql
+      - db-data:/var/lib/mysql
+  app:
+    build:
+      context: ./
+      dockerfile: ./Dockerfile
+    image: node-mysql-app
+    container_name: node_server_container
+    ports:
+      - $NODE_LOCAL_PORT:$NODE_DOCKER_PORT
+    volumes: 
+      - ./:/app
+      - app/node_modules
+    depends_on:
+      - mysqldb
+    links:
+      - mysqldb
+    stdin_open: true
+    tty: true
+
+volumes: 
+  db-config:
+  db-data:
